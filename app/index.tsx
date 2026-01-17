@@ -1,20 +1,8 @@
+import { Pokemon } from "@/src/models/PokemonModel";
+import { fetchPokemonByName, fetchPokemonList } from "@/src/Service/APIService";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
-
-interface Pokemon {
-  name: string;
-  image: string;
-  imageBack: string;
-  type: PokemonType[];
-}
-
-interface PokemonType {
-  type: {
-    name: string;
-    url: string;
-  };
-}
 
 const colorsByType = {
   grass: "#74CB48",
@@ -42,35 +30,54 @@ export default function Index() {
   const [pokemons, setPokemondataData] = useState<Pokemon[]>([]);
 
   useEffect(() => {
-    fetchData();
+    load();
   }, []);
 
-  async function fetchData() {
-    try {
-      const response = await fetch(
-        "https://pokeapi.co/api/v2/pokemon/?limit=10"
-      );
-      const data = await response.json();
-      console.log(data);
+  async function load() {
+    const list = await fetchPokemonList(10);
 
-      // Fetch Pokemin details
-      const detailedPokemon = await Promise.all(
-        data.results.map(async (pokemon: any) => {
-          const res = await fetch(pokemon.url);
-          const details = await res.json();
-          return {
-            name: pokemon.name,
-            image: details.sprites.front_default,
-            imageBack: details.sprites.back_default,
-            type: details.types,
-          };
-        })
-      );
-      setPokemondataData(detailedPokemon);
-    } catch (e) {
-      console.log(e);
-    }
+    const detailed = await Promise.all(
+      list.map((p: any) => fetchPokemonByName(p.name))
+    );
+
+    setPokemondataData(detailed);
   }
+  //Fetching Data
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
+
+  // async function fetchData() {
+  //   try {
+  //     const response = await fetch(
+  //       "https://pokeapi.co/api/v2/pokemon/?limit=30"
+  //     );
+  //     const data = await response.json();
+  //     console.log(data);
+
+  //     // Fetch Pokemin details
+  //     const detailedPokemon = await Promise.all(
+  //       data.results.map(async (pokemon: any) => {
+  //         const res = await fetch(pokemon.url);
+  //         const details = await res.json();
+  //         return {
+  //           name: pokemon.name,
+  //           height: details.height,
+  //           weight: details.weight,
+  //           stats: details.stats,
+  //           image: details.sprites.front_default,
+  //           imageBack: details.sprites.back_default,
+  //           type: details.types,
+  //           heldItems: details.held_items,
+  //         };
+  //       })
+  //     );
+  //     console.log(detailedPokemon);
+  //     setPokemondataData(detailedPokemon);
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // }
   return (
     <ScrollView
       contentContainerStyle={{
@@ -81,25 +88,29 @@ export default function Index() {
       {pokemons.map((pokemon) => (
         <Link
           key={pokemon.name}
-          href={"/details"}
+          href={{ pathname: "/details", params: { pokemon: pokemon.name } }}
           style={{
             //@ts-ignore
             backgroundColor: colorsByType[pokemon.type[0].type.name] + 50,
             padding: 20,
             borderRadius: 20,
+            alignItems: "center",
+            textAlign: "center",
           }}
         >
           <View>
             <Text style={styles.name}>{pokemon.name}</Text>
             <Text style={styles.type}>{pokemon.type[0].type.name}</Text>
-            <View style={{ flexDirection: "row" }}>
+
+            <View style={{ flexDirection: "row" , justifyContent: "center"}}>
               <Image
                 source={{ uri: pokemon.image }}
-                style={{ width: 100, height: 100 }}
-              ></Image>
-              <Image
-                source={{ uri: pokemon.imageBack }}
-                style={{ width: 100, height: 100 }}
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center", 
+                  width: 100,
+                  height:100
+                }}
               ></Image>
             </View>
           </View>
@@ -118,9 +129,7 @@ const styles = StyleSheet.create({
   type: {
     color: "grey",
     fontSize: 20,
-
     fontWeight: 500,
-
     textAlign: "center",
   },
 });
