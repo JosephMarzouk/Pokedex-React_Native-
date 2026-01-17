@@ -7,7 +7,7 @@ export default function RootLayout() {
       <Stack.Screen
         name="details"
         options={{
-          headerBackButtonDisplayMode: "minimal",
+         headerBackButtonDisplayMode: 'minimal',
           presentation: "formSheet",
           sheetAllowedDetents: [0.3, 0.5, 0.8],
           headerShown: true,
