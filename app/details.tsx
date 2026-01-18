@@ -109,6 +109,26 @@ export default function DetailsScreen() {
                 <Text style={styles.infoValue}>{pokemon!.weight / 10} kg</Text>
               </View>
             </View>
+            <Text style={styles.sectionTitle}>Stats</Text>
+
+            <View style={styles.statsContainer}>
+              {pokemon?.stats.map((item) => (
+                <View key={item.stat.name} style={styles.statRow}>
+                  <Text style={styles.statName}>
+                    {item.stat.name.toUpperCase()}
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.statValue,
+                      { color: colorsByType[pokemon!.type[0].type.name] },
+                    ]}
+                  >
+                    {item.base_stat}
+                  </Text>
+                </View>
+              ))}
+            </View>
           </View>
         </ScrollView>
       </>
@@ -174,6 +194,34 @@ const styles = StyleSheet.create({
 
   infoValue: {
     fontSize: 18,
+    fontWeight: "bold",
+  },
+
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 24,
+    marginBottom: 12,
+  },
+
+  statsContainer: {
+    gap: 10,
+  },
+
+  statRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: "#f2f2f2",
+  },
+
+  statName: {
+    fontWeight: "600",
+    color: "#555",
+  },
+
+  statValue: {
     fontWeight: "bold",
   },
 });

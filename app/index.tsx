@@ -1,8 +1,16 @@
 import { Pokemon } from "@/src/models/PokemonModel";
 import { fetchPokemonByName, fetchPokemonList } from "@/src/Service/APIService";
+
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const colorsByType = {
   grass: "#74CB48",
@@ -28,19 +36,28 @@ const colorsByType = {
 
 export default function Index() {
   const [pokemons, setPokemondataData] = useState<Pokemon[]>([]);
+  const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const pokemonLimit = 10;
 
   useEffect(() => {
     load();
   }, []);
 
   async function load() {
-    const list = await fetchPokemonList(10);
+    if (loading) return;
+
+    setLoading(true);
+    const list = await fetchPokemonList(pokemonLimit, offset);
 
     const detailed = await Promise.all(
-      list.map((p: any) => fetchPokemonByName(p.name))
+      list.map((p: any) => fetchPokemonByName(p.name)),
     );
-
-    setPokemondataData(detailed);
+    setPokemondataData((prev) => [...prev, ...detailed]);
+    setOffset((prev) => prev + pokemonLimit);
+    setLoading(false);
+    // setPokemondataData(detailed);
   }
   //Fetching Data
   // useEffect(() => {
@@ -102,20 +119,29 @@ export default function Index() {
             <Text style={styles.name}>{pokemon.name}</Text>
             <Text style={styles.type}>{pokemon.type[0].type.name}</Text>
 
-            <View style={{ flexDirection: "row" , justifyContent: "center"}}>
+            <View style={{ flexDirection: "row", justifyContent: "center" }}>
               <Image
                 source={{ uri: pokemon.image }}
                 style={{
                   flexDirection: "row",
-                  justifyContent: "center", 
+                  justifyContent: "center",
                   width: 100,
-                  height:100
+                  height: 100,
                 }}
               ></Image>
             </View>
           </View>
         </Link>
       ))}
+      <TouchableOpacity
+        style={styles.loadMoreButton}
+        onPress={load}
+        disabled={loading}
+      >
+        <Text style={styles.loadMoreText}>
+          {loading ? "Loading..." : "Load More"}
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -131,5 +157,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 500,
     textAlign: "center",
+  },
+  loadMoreButton: {
+    marginVertical: 20,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#333",
+    alignItems: "center",
+  },
+  loadMoreText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

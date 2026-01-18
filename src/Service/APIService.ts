@@ -1,7 +1,9 @@
 const BASE_URL = "https://pokeapi.co/api/v2/pokemon";
 
-export async function fetchPokemonList(limit: number = 10) {
-  const res = await fetch(`${BASE_URL}?limit=${limit}`);
+export async function fetchPokemonList(limit: number, offset: number) {
+  const res = await fetch(
+    `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`,
+  );
   const data = await res.json();
   return data.results;
 }
